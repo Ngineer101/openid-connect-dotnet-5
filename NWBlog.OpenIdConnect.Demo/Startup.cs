@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using OpenIddict.Abstractions;
 
 namespace NWBlog.OpenIdConnect.Demo
 {
@@ -24,6 +27,20 @@ namespace NWBlog.OpenIdConnect.Demo
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "NWBlog.OpenIdConnect.Demo", Version = "v1" });
+            });
+
+            services.AddDbContext<DefaultDbContext>(options =>
+            {
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnectionString"));
+                options.UseOpenIddict();
+            });
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.UserNameClaimType = OpenIddictConstants.Claims.Name;
+                options.ClaimsIdentity.UserIdClaimType = OpenIddictConstants.Claims.Subject;
+                options.ClaimsIdentity.RoleClaimType = OpenIddictConstants.Claims.Role;
+                // configure more options if necessary...
             });
         }
 
